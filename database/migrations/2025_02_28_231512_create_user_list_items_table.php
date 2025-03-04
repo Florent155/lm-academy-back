@@ -11,14 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_infos', function (Blueprint $table) {
+        Schema::create('user_list_items', function (Blueprint $table) {
+         
             $table->id();
+            $table->unsignedbigInteger('list_id');
             $table->unsignedbigInteger('user_id');
-            $table->string('address')->nullable();
-            $table->string('tel')->nullable();
-            $table->text('about')->nullable();
             $table->timestamps();
+            
+            $table->unique(['list_id', 'user_id']);
 
+           
+            $table->foreign('list_id')->references('id')->on('userlists')->onDelete('cascade');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
 
         });
@@ -29,6 +32,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_infos');
+        Schema::dropIfExists('user_list_items');
+
     }
+
 };

@@ -13,11 +13,17 @@ class Scoreboard extends Model
     ];
     
     public function user() {
-        $this->belongsTo(User::class, 'user_id');
+      return   $this->belongsTo(User::class, 'user_id');
     }
 
     public function userData() {
-        $this->belongsTo(User::class, 'user_id')->selectSomeUserData;
+        return  $this->belongsTo(User::class, 'user_id')->selectSomeUserData();
     }
+
+    const Points = [
+        'course_completed'=> [
+            'points' => 1
+        ]
+        ];
 
 }

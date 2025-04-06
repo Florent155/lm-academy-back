@@ -2,13 +2,12 @@
 
 namespace Database\Seeders;
 
-
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Models\UserInfo;
+use Spatie\Permission\Models\Permission;
 
 class UserSeeder extends Seeder
 {
@@ -17,12 +16,6 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        
-      
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        DB::table('users')->delete(); 
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-
         $albanianUsers = [
             [
                 'user' => [
@@ -39,7 +32,8 @@ class UserSeeder extends Seeder
                     'address' => 'Rruga Adem Jashari, Vushtrri',
                     'tel' => '+383 44 123 456',
                     'about' => 'Computer Science student with a passion for web development.',
-                ]
+                ],
+                'role' => 'Admin'
             ],
             [
                 'user' => [
@@ -56,7 +50,8 @@ class UserSeeder extends Seeder
                     'address' => 'Rruga UCK, Prishtinë',
                     'tel' => '+383 45 234 567',
                     'about' => 'Studying Information Technology with focus on cybersecurity.',
-                ]
+                ],
+                'role' => 'Admin'
             ],
             [
                 'user' => [
@@ -73,7 +68,8 @@ class UserSeeder extends Seeder
                     'address' => 'Rruga Skenderbeu, Vushtrri',
                     'tel' => '+383 49 345 678',
                     'about' => 'Final year student specializing in artificial intelligence.',
-                ]
+                ],
+                'role' => 'User'
             ],
             [
                 'user' => [
@@ -90,7 +86,8 @@ class UserSeeder extends Seeder
                     'address' => 'Rruga Mbreteresha Teutë, Mitrovicë',
                     'tel' => '+383 44 456 789',
                     'about' => 'Freshman student interested in mobile app development.',
-                ]
+                ],
+                'role' => 'User'
             ],
             [
                 'user' => [
@@ -107,13 +104,47 @@ class UserSeeder extends Seeder
                     'address' => 'Rruga Dëshmorët e Kombit, Pejë',
                     'tel' => '+383 45 567 890',
                     'about' => 'Software engineering student focusing on cloud computing.',
-                ]
+                ],
+                'role' => 'User'
             ],
         ];
 
-        foreach ($albanianUsers as $userData) {
+        foreach ($albanianUsers as $key => $userData) {
             $user = User::create($userData['user']);
             $user->UserInfo()->create($userData['info']);
+            $user->assignRole($userData['role'] ?? 'User');
+
+            if ($key === 0) {
+                $permissions = [
+                    [
+                        'name' => 'create_permissions',
+                        //'description' => 'Can create new permissions',
+                    ],
+                    [
+                        'name' => 'update_permissions',
+                       // 'description' => 'Can update permissions',
+                    ],
+                    [
+                        'name' => 'delete_permissions',
+                        //'description' => 'Can delete permissions',
+                    ],
+                    [
+                        'name' => 'update_admin_profile_permission',
+                        //'description' => 'Can update admin profile permission',
+                    ],
+                    [
+                        'name' => 'reset_admin_password_permission',
+                        //'description' => 'Can reset admin password permission',
+                    ],
+                ];
+
+                $createdPermissions = [];
+                foreach ($permissions as $permission) {
+                    $createdPermissions[] = Permission::create($permission);
+                }
+
+                $user->givePermissionTo($createdPermissions);
+            }
         }
     }
 }

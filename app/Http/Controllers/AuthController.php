@@ -70,7 +70,7 @@ class AuthController extends Controller
                 'user' => $user
             ], 201);
 
-        } catch (\Expetion $e) {
+        } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
         
@@ -104,7 +104,7 @@ class AuthController extends Controller
             return response()->json(['message'=> 'Successfully logged out']);
 
         }
-        catch(\Expetion $e) {
+        catch(\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
 
         }

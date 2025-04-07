@@ -3,7 +3,13 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return response()->json(['message' => 'Welcome to Laravel']);
+    return view('welcome');
+
+});
+
+Route::get('/test-mail', function () {
+    return view('Email.test-mail');
+    
 });
 
 

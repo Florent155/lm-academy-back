@@ -12,4 +12,9 @@ Route::get('/test-mail', function () {
     
 });
 
+Route::get('/hello', function () {
+    return 'hello from web';
+});
+
+
 

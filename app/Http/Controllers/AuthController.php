@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+
+use Illuminate\Support\Facades\Auth;
 use Validator;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -33,6 +35,7 @@ class AuthController extends Controller
         }
 
         return $this->respondWithToken($token);
+
     }
 
      /**
@@ -147,17 +150,69 @@ class AuthController extends Controller
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 60
+            'expires_in' => auth()->factory()->getTTL() * 3600,
+            'user' => auth()->user(),
         ]);
     }
 
     public function sendRegistrationInvite(Request $request) {
-     //if ($this->user->hasRole('Admin')) {
-        return response()->json(['message'=>'inside method','AuthUser'=> $this->$user]);
-    // } else {
-     //   return response()->json(['message'=> 'You do not have permission to access this method'], 403);
-    // }
+        $user = Auth::user(); // Get the currently authenticated user
 
+        if ($user && $user->hasRole('Admin')) {
+            try {
+                $validator = Validator::make($request->all(), [
+                    'invited_users' => 'required|string',
+                ]);
+
+                if ($validator->fails()) {
+                    return response()->json($validator->errors()->toJson(), 400);
+                }
+
+                $invited_users = array_map('trim', explode(',', $request->invited_users));
+                $invited_users = array_unique($invited_users);
+                $invited_users = array_filter($invited_users);
+                $invited_users = array_values($invited_users);
+                $invalid_emails = [];
+                $valid_emails = [];
+                $existing_users = [];
+
+                foreach ($invited_users as $email) {
+                    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                        $invalid_emails[] = $email;
+                    } else {
+                     if (User::where('email', $email)->exists()) {
+                            $existing_users[] = $email;
+                        } else {
+                            $valid_emails[] = $email;
+                        }
+                    }
+                }
+                $invalid_emails = implode(', ', $invalid_emails);
+                $existing_users = implode(', ', $existing_users);
+
+                if (count($valid_emails) > 0) {
+                    // Send registaation invite email
+                   // return count($valid_emails);
+                }
+
+                return response()->json([
+                    'invited_users' => $valid_emails,
+                    'invalid_emails' => $invalid_emails,
+                    'existing_users' => $existing_users,
+                ]);
+            } catch (\Exception $e) {
+                return response()->json(['error' => $e->getMessage()], 500);
+            }
+        } else {
+            return response()->json(['message' => 'You do not have permission to access this method', 'user' => $this->user], 403);
+        }
     }
+    
+      //constants
+    const CODE_VERIFICATION_DURATION_MINUTES= 3.5;
+    const TOKEN_VERIFICATION_DURATION_MINUTES = 60;
+    const TOKEN_PASSWORD_RESET_DURATION_MINUTES = 5;
+    
+
 
 }
